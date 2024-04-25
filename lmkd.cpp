@@ -173,6 +173,8 @@ static inline void trace_kill_end() {}
 #define DEF_COMPLETE_STALL 700
 /* ro.lmk.swap_compression_ratio property defaults */
 #define DEF_SWAP_COMP_RATIO 1
+/* ro.lmk.lowmem_min_oom_score defaults */
+#define DEF_LOWMEM_MIN_SCORE (PREVIOUS_APP_ADJ + 1)
 
 #define PSI_CONT_EVENT_THRESH (4)
 #define LMKD_REINIT_PROP "lmkd.reinit"
@@ -261,6 +263,7 @@ static int psi_cont_event_thresh = PSI_CONT_EVENT_THRESH;
 static int psi_window_size_ms = PSI_WINDOW_SIZE_MS;
 static int psi_poll_period_scrit_ms = PSI_POLL_PERIOD_SHORT_MS;
 static int swap_compression_ratio;
+static int lowmem_min_oom_score;
 static struct psi_threshold psi_thresholds[VMPRESS_LEVEL_COUNT] = {
     { PSI_SOME, PSI_OLD_LOW_THRESH_MS },    /* Default 70ms out of 1sec for partial stall */
     { PSI_SOME, PSI_OLD_MED_THRESH_MS },   /* Default 100ms out of 1sec for partial stall */
@@ -3783,7 +3786,7 @@ static void mp_event_psi(int data, uint32_t events, struct polling_params *poll_
         kill_reason = LOW_MEM_AND_SWAP;
         snprintf(kill_desc, sizeof(kill_desc), "%s watermark is breached",
             wmark < WMARK_LOW ? "min" : "low");
-        min_score_adj = PREVIOUS_APP_ADJ + 1;
+        min_score_adj = lowmem_min_oom_score;
     }
 
     /* Kill a process if necessary */
@@ -5005,6 +5008,9 @@ static void update_props() {
     stall_limit_critical = GET_LMK_PROPERTY(int64, "stall_limit_critical", 100);
     swap_compression_ratio =
             GET_LMK_PROPERTY(int64, "swap_compression_ratio", DEF_SWAP_COMP_RATIO);
+    lowmem_min_oom_score =
+            std::max(PERCEPTIBLE_APP_ADJ + 1,
+                     GET_LMK_PROPERTY(int32, "lowmem_min_oom_score", DEF_LOWMEM_MIN_SCORE));
 
     reaper.enable_debug(debug_process_killing);
 
