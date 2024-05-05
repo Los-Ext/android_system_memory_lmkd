@@ -174,7 +174,8 @@ static inline void trace_kill_end() {}
 /* ro.lmk.swap_compression_ratio property defaults */
 #define DEF_SWAP_COMP_RATIO 1
 /* ro.lmk.lowmem_min_oom_score defaults */
-#define DEF_LOWMEM_MIN_SCORE (PREVIOUS_APP_ADJ + 1)
+#define LOWMEM_ADJ 800
+#define DEF_LOWMEM_MIN_SCORE (LOWMEM_ADJ + 1)
 
 #define PSI_CONT_EVENT_THRESH (4)
 #define LMKD_REINIT_PROP "lmkd.reinit"
